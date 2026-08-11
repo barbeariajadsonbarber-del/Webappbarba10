@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Barbers collection
+    match /barbers/{barberId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Services collection
+    match /services/{serviceId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Feed collection
+    match /feed/{postId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Appointments collection
+    match /appointments/{appointmentId} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasAll(['barberId', 'date', 'startTime', 'endTime', 'services', 'totalDuration', 'totalPrice', 'status', 'createdAt'])
+                   && request.resource.data.totalPrice >= 0
+                   && request.resource.data.totalDuration > 0;
+      allow update: if request.resource.data.status in ['Agendado', 'Confirmado', 'Concluído', 'Cancelado'];
+      allow delete: if false;
+    }
+  }
+}
